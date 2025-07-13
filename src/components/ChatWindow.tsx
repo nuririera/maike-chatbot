@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 
 type Message = {
@@ -20,6 +21,12 @@ export default function ChatWindow({
   onInputChange,
   onSubmit,
 }: Props) {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <>
       <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
@@ -31,6 +38,7 @@ export default function ChatWindow({
             MAIke está pensando...
           </div>
         )}
+        <div ref={bottomRef} />
       </div>
 
       <form onSubmit={onSubmit} className="flex gap-2">

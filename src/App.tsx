@@ -13,6 +13,7 @@ const initialSettings: Settings = {
   style: "socratic",
   level: "Universidad",
   tone: "formal",
+  visualMode: false,
 };
 
 type Message = { role: "user" | "bot"; content: string };
@@ -28,6 +29,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [showSettings, setShowSettings] = useState(false);
+  const [videoIndex, setVideoIndex] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +43,24 @@ function App() {
 
     try {
       const replyText = await getGeminiResponse(updatedMessages, settings);
-      const botMessage: Message = { role: "bot", content: replyText };
-      setMessages([...updatedMessages, botMessage]);
+
+      if (settings.visualMode) {
+        const nextIndex = (videoIndex + 1) % 3;
+        setMessages([
+          ...updatedMessages,
+          {
+            role: "bot",
+            content: `<video src="/videos/response${
+              nextIndex + 1
+            }.mp4" controls class="rounded-xl w-full" autoplay playsinline />`,
+          },
+        ]);
+
+        setVideoIndex(nextIndex);
+      } else {
+        const botMessage: Message = { role: "bot", content: replyText };
+        setMessages([...updatedMessages, botMessage]);
+      }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setMessages([
