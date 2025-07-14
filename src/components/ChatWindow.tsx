@@ -1,8 +1,11 @@
+import { useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 
 type Message = {
   role: "user" | "bot";
   content: string;
+  isVideo?: boolean;
+  videoSrc?: string;
 };
 
 type Props = {
@@ -20,17 +23,30 @@ export default function ChatWindow({
   onInputChange,
   onSubmit,
 }: Props) {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <>
-      <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
+      <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
         {messages.map((msg, i) => (
-          <MessageBubble key={i} role={msg.role} content={msg.content} />
+          <MessageBubble
+            key={i}
+            role={msg.role}
+            content={msg.content}
+            isVideo={msg.isVideo}
+            videoSrc={msg.videoSrc}
+          />
         ))}
         {loading && (
           <div className="text-sm italic text-zinc-500">
-            MAIke está pensando...
+            Maike está pensando...
           </div>
         )}
+        <div ref={bottomRef} />
       </div>
 
       <form onSubmit={onSubmit} className="flex gap-2">
@@ -44,7 +60,7 @@ export default function ChatWindow({
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
+          className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
         >
           Enviar
         </button>

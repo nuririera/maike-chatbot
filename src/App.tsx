@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { getGeminiResponse } from "./lib/gemini";
 import { defaultSettings, type Settings } from "./lib/settings";
 import ChatWindow from "./components/ChatWindow";
@@ -8,14 +8,20 @@ import { Settings as SettingsIcon } from "lucide-react";
 const initialSettings: Settings = {
   ...defaultSettings,
   userName: "Nuria",
-  assistantName: "MAIke",
+  assistantName: "Maike",
   motivation: "preparar sus exámenes de ingeniería mecánica",
   style: "socratic",
   level: "Universidad",
   tone: "formal",
+  visualMode: false,
 };
 
-type Message = { role: "user" | "bot"; content: string };
+type Message = {
+  role: "user" | "bot";
+  content: string;
+  isVideo?: boolean;
+  videoSrc?: string;
+};
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([
@@ -28,6 +34,22 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [showSettings, setShowSettings] = useState(false);
+  const [videoIndex, setVideoIndex] = useState(0);
+
+  const prevVisualMode = useRef(settings.visualMode);
+  useEffect(() => {
+    if (!prevVisualMode.current && settings.visualMode) {
+      const firstVideoMessage: Message = {
+        role: "bot",
+        content: "",
+        isVideo: true,
+        videoSrc: "/videos/response1.mp4",
+      };
+      setMessages((prev) => [...prev, firstVideoMessage]);
+      setVideoIndex(1);
+    }
+    prevVisualMode.current = settings.visualMode;
+  }, [settings.visualMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,15 +63,31 @@ function App() {
 
     try {
       const replyText = await getGeminiResponse(updatedMessages, settings);
-      const botMessage: Message = { role: "bot", content: replyText };
-      setMessages([...updatedMessages, botMessage]);
+
+      if (settings.visualMode) {
+        const nextIndex = videoIndex % 4;
+        setMessages([
+          ...updatedMessages,
+          {
+            role: "bot",
+            content: "", // No usamos content si es video
+            isVideo: true,
+            videoSrc: `/videos/response${nextIndex + 1}.mp4`,
+          },
+        ]);
+
+        setVideoIndex(nextIndex + 1);
+      } else {
+        const botMessage: Message = { role: "bot", content: replyText };
+        setMessages([...updatedMessages, botMessage]);
+      }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setMessages([
         ...updatedMessages,
         {
           role: "bot",
-          content: "Ocurrió un error al contactar con MAIke.",
+          content: "Ocurrió un error al contactar con Maike.",
         },
       ]);
     } finally {

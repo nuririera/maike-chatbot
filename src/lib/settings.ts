@@ -5,10 +5,11 @@ export type Settings = {
   level?: "ESO" | "Bachillerato" | "Universidad" | "Otro";
   motivation?: string;
   tone: "formal" | "informal";
+  visualMode?: boolean;
 };
 
 export const defaultSettings: Settings = {
-  assistantName: "MAIke",
+  assistantName: "Maike",
   style: "socratic",
   level: "Universidad",
   tone: "formal",
