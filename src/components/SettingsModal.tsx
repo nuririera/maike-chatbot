@@ -90,7 +90,7 @@ export default function SettingsModal({ settings, onClose, onChange }: Props) {
           </button>
           <button
             onClick={onClose}
-            className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            className="text-sm px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-800"
           >
             Guardar
           </button>

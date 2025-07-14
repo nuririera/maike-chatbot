@@ -1,22 +1,16 @@
-import { useEffect, useRef } from "react";
-
 type Props = {
   role: "user" | "bot";
   content: string;
+  isVideo?: boolean;
+  videoSrc?: string;
 };
 
-export default function MessageBubble({ role, content }: Props) {
-  const isVideo = content.includes("<video");
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (isVideo && videoRef.current) {
-      videoRef.current.play().catch((err) => {
-        console.warn("Autoplay failed:", err);
-      });
-    }
-  }, [content]);
-
+export default function MessageBubble({
+  role,
+  content,
+  isVideo,
+  videoSrc,
+}: Props) {
   return (
     <div
       className={`p-3 rounded-xl w-fit max-w-[80%] text-sm whitespace-pre-wrap ${
@@ -27,15 +21,10 @@ export default function MessageBubble({ role, content }: Props) {
     >
       {isVideo ? (
         <video
-          ref={videoRef}
-          src={getVideoSrcFromHTML(content)}
+          src={videoSrc}
           controls
           autoPlay
-          muted
           playsInline
-          onEnded={() => {
-            // Aquí podrías disparar algún callback si lo deseas
-          }}
           className="rounded-xl w-full"
         />
       ) : (
@@ -43,9 +32,4 @@ export default function MessageBubble({ role, content }: Props) {
       )}
     </div>
   );
-}
-
-function getVideoSrcFromHTML(html: string): string {
-  const match = html.match(/src="([^"]+)"/);
-  return match?.[1] ?? "";
 }

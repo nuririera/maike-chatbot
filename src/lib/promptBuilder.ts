@@ -2,7 +2,7 @@
 import type { Settings } from "./settings";
 
 export function buildSystemMessage(settings: Settings): string {
-  const name = settings.assistantName || "MAIke";
+  const name = settings.assistantName || "Maike";
   const user = settings.userName ? `Su nombre es ${settings.userName}.` : "";
   const tone =
     settings.tone === "informal"

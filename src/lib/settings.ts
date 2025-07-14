@@ -9,7 +9,7 @@ export type Settings = {
 };
 
 export const defaultSettings: Settings = {
-  assistantName: "MAIke",
+  assistantName: "Maike",
   style: "socratic",
   level: "Universidad",
   tone: "formal",
