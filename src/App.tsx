@@ -1,19 +1,20 @@
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getGeminiResponse } from "./lib/gemini";
 import { defaultSettings, type Settings } from "./lib/settings";
 import ChatWindow from "./components/ChatWindow";
 import SettingsModal from "./components/SettingsModal";
-import { Settings as SettingsIcon } from "lucide-react";
+import { Settings as SettingsIcon, NotebookText } from "lucide-react";
+import { extractPersonality } from "./lib/utils";
+import PersonalityHistoryModal from "./components/PersonalityModal";
+import WelcomeModal from "./components/WelcomeModal";
 
 const initialSettings: Settings = {
   ...defaultSettings,
   userName: "Nuria",
   assistantName: "Maike",
-  motivation: "preparar sus exámenes de ingeniería mecánica",
-  style: "socratic",
-  level: "Universidad",
   tone: "formal",
   visualMode: false,
+  predictionMode: true,
 };
 
 type Message = {
@@ -27,7 +28,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
-      content: `Hola, soy ${initialSettings.assistantName}. ¿En qué puedo ayudarte hoy?`,
+      content: `Hola, soy ${initialSettings.assistantName}. ¿Qué tema te gustaría abordar hoy?`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -35,6 +36,8 @@ function App() {
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [showSettings, setShowSettings] = useState(false);
   const [videoIndex, setVideoIndex] = useState(0);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const prevVisualMode = useRef(settings.visualMode);
   useEffect(() => {
@@ -64,8 +67,20 @@ function App() {
     try {
       const replyText = await getGeminiResponse(updatedMessages, settings);
 
+      const { personality, clean } = extractPersonality(replyText);
+
+      if (personality) {
+        const existing = JSON.parse(
+          localStorage.getItem("userPersonality") || "[]"
+        );
+        existing.push({ date: new Date().toISOString(), personality });
+        localStorage.setItem("userPersonality", JSON.stringify(existing));
+        //Guardar en un estado
+        console.log("Personalidad inferida:", personality);
+      }
+
       if (settings.visualMode) {
-        const nextIndex = videoIndex % 4;
+        const nextIndex = videoIndex % 5;
         setMessages([
           ...updatedMessages,
           {
@@ -78,7 +93,7 @@ function App() {
 
         setVideoIndex(nextIndex + 1);
       } else {
-        const botMessage: Message = { role: "bot", content: replyText };
+        const botMessage: Message = { role: "bot", content: clean };
         setMessages([...updatedMessages, botMessage]);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -102,13 +117,22 @@ function App() {
           <h1 className="text-xl font-semibold text-zinc-800">
             {settings.assistantName}
           </h1>
-          <button
-            onClick={() => setShowSettings(true)}
-            className="p-2 rounded-full hover:bg-zinc-200 transition"
-            aria-label="Abrir ajustes"
-          >
-            <SettingsIcon className="w-5 h-5 text-zinc-700" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowHistory(true)}
+              className="p-2 rounded-full hover:bg-zinc-200 transition"
+              aria-label="Ver historial"
+            >
+              <NotebookText className="w-5 h-5 text-zinc-700" />
+            </button>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 rounded-full hover:bg-zinc-200 transition"
+              aria-label="Abrir ajustes"
+            >
+              <SettingsIcon className="w-5 h-5 text-zinc-700" />
+            </button>
+          </div>
         </div>
 
         <ChatWindow
@@ -127,6 +151,12 @@ function App() {
           onChange={setSettings}
         />
       )}
+
+      {showHistory && (
+        <PersonalityHistoryModal onClose={() => setShowHistory(false)} />
+      )}
+
+      {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
     </div>
   );
 }

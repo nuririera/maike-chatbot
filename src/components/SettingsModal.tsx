@@ -20,12 +20,7 @@ export default function SettingsModal({ settings, onClose, onChange }: Props) {
         </button>
         <h2 className="text-lg font-semibold">Configuración del asistente</h2>
         <div className="space-y-2">
-          {[
-            ["userName", "Nombre del usuario"],
-            ["assistantName", "Nombre del asistente"],
-            ["motivation", "Motivación del usuario"],
-            ["level", "Nivel educativo"],
-          ].map(([key, label]) => (
+          {[["userName", "Nombre del usuario"]].map(([key, label]) => (
             <input
               key={key}
               placeholder={label}
@@ -36,23 +31,7 @@ export default function SettingsModal({ settings, onClose, onChange }: Props) {
             />
           ))}
 
-          <select
-            value={settings.style}
-            onChange={(e) =>
-              onChange({
-                ...settings,
-                style: e.target.value as Settings["style"],
-              })
-            }
-            className="w-full border border-zinc-300 rounded-lg px-3 py-2"
-          >
-            <option value="socratic">Socrático</option>
-            <option value="casual">Casual</option>
-            <option value="friendly">Amigable</option>
-            <option value="direct">Directo</option>
-          </select>
-
-          <select
+          {/* <select
             value={settings.tone}
             onChange={(e) =>
               onChange({
@@ -64,21 +43,52 @@ export default function SettingsModal({ settings, onClose, onChange }: Props) {
           >
             <option value="formal">Formal</option>
             <option value="informal">Informal</option>
-          </select>
+          </select> */}
 
           {/* Toggle visual mode */}
-          <label className="flex items-center gap-2 mt-2">
-            <input
-              type="checkbox"
-              checked={settings.visualMode ?? false}
-              onChange={(e) =>
-                onChange({ ...settings, visualMode: e.target.checked })
-              }
-            />
+          <div className="flex items-center justify-between mt-4">
             <span className="text-sm text-zinc-700">
               Activar modo visual (avatar con vídeo)
             </span>
-          </label>
+            <button
+              onClick={() =>
+                onChange({ ...settings, visualMode: !settings.visualMode })
+              }
+              className={`relative w-11 h-6 transition-colors duration-300 rounded-full ${
+                settings.visualMode ? "bg-gray-700" : "bg-zinc-300"
+              }`}
+            >
+              <span
+                className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
+                  settings.visualMode ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Toggle personality prediction mode */}
+          <div className="flex items-center justify-between mt-4">
+            <span className="text-sm text-zinc-700">
+              Activar modo predicción de personalidad
+            </span>
+            <button
+              onClick={() =>
+                onChange({
+                  ...settings,
+                  predictionMode: !settings.predictionMode,
+                })
+              }
+              className={`relative w-11 h-6 transition-colors duration-300 rounded-full ${
+                settings.predictionMode ? "bg-gray-700" : "bg-zinc-300"
+              }`}
+            >
+              <span
+                className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
+                  settings.predictionMode ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">
