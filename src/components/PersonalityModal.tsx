@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getBigFiveFromHistory } from "../lib/gemini";
 
 type Entry = {
   date: string;
@@ -18,14 +19,6 @@ type Level =
   | "Muy alto"
   | "Desconocido";
 
-const bigFiveResults: { trait: string; level: Level }[] = [
-  { trait: "Apertura a la experiencia", level: "Muy alto" },
-  { trait: "Responsabilidad", level: "Alto" },
-  { trait: "Extraversión", level: "Medio" },
-  { trait: "Amabilidad", level: "Bajo" },
-  { trait: "Neuroticismo", level: "Muy bajo" },
-];
-
 const levelColor: Record<Level, string> = {
   "Muy bajo": "bg-red-200 text-red-800",
   Bajo: "bg-orange-200 text-orange-800",
@@ -34,11 +27,45 @@ const levelColor: Record<Level, string> = {
   "Muy alto": "bg-green-200 text-green-800",
   Desconocido: "bg-zinc-200 text-zinc-800",
 };
+
 export default function PersonalityHistoryModal({ onClose }: Props) {
   const [tab, setTab] = useState<"history" | "results">("history");
   const history: Entry[] = JSON.parse(
     localStorage.getItem("userPersonality") || "[]"
   );
+
+  const [bigFiveResults, setBigFiveResults] = useState<
+    { trait: string; level: Level }[] | null
+  >(null);
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab === "results" && history.length > 0 && !bigFiveResults) {
+      setLoading(true);
+      getBigFiveFromHistory(history).then((res) => {
+        console.log("Respuesta de getBigFiveFromHistory:", res);
+        if (res) {
+          const mappedResults = Object.entries(res).map(([trait, level]) => ({
+            trait,
+            level: (level as Level) ?? "Desconocido",
+          }));
+          setBigFiveResults(mappedResults);
+        } else {
+          setBigFiveResults(
+            [
+              "Apertura a la experiencia",
+              "Responsabilidad",
+              "Extraversión",
+              "Amabilidad",
+              "Neuroticismo",
+            ].map((trait) => ({ trait, level: "Desconocido" as Level }))
+          );
+        }
+        setLoading(false);
+      });
+    }
+  }, [tab, history, bigFiveResults]);
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
@@ -96,7 +123,9 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
               </ul>
             )}
           </>
-        ) : (
+        ) : loading ? (
+          <p className="text-center text-zinc-600">Cargando resultados...</p>
+        ) : bigFiveResults ? (
           <>
             <h2 className="text-lg font-semibold">Resultados Big Five</h2>
             <ul className="space-y-2">
@@ -115,6 +144,10 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
               ))}
             </ul>
           </>
+        ) : (
+          <p className="text-center text-zinc-600">
+            No hay resultados para mostrar.
+          </p>
         )}
       </div>
     </div>
