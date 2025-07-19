@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getBigFiveFromHistory } from "../lib/gemini";
+import { Download } from "lucide-react";
 
 type Entry = {
   date: string;
@@ -46,19 +47,32 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
       getBigFiveFromHistory(history).then((res) => {
         console.log("Respuesta de getBigFiveFromHistory:", res);
         if (res) {
-          const mappedResults = Object.entries(res).map(([trait, level]) => ({
-            trait,
-            level: (level as Level) ?? "Desconocido",
-          }));
+          const traitOrder = [
+            "Extraversión",
+            "Amabilidad",
+            "Responsabilidad",
+            "Neuroticismo",
+            "Apertura a la experiencia",
+          ];
+
+          const mappedResults = Object.entries(res)
+            .map(([trait, level]) => ({
+              trait,
+              level: (level as Level) ?? "Desconocido",
+            }))
+            .sort(
+              (a, b) =>
+                traitOrder.indexOf(a.trait) - traitOrder.indexOf(b.trait)
+            );
           setBigFiveResults(mappedResults);
         } else {
           setBigFiveResults(
             [
-              "Apertura a la experiencia",
-              "Responsabilidad",
               "Extraversión",
               "Amabilidad",
+              "Responsabilidad",
               "Neuroticismo",
+              "Apertura a la experiencia",
             ].map((trait) => ({ trait, level: "Desconocido" as Level }))
           );
         }
@@ -66,6 +80,20 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
       });
     }
   }, [tab, history, bigFiveResults]);
+
+  function downloadHistory(history: Entry[]) {
+    const dataStr = JSON.stringify(history, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "historial_personalidad.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
@@ -103,7 +131,19 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
 
         {tab === "history" ? (
           <>
-            <h2 className="text-lg font-semibold">Historial de hipótesis</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Historial de hipótesis</h2>
+
+              {history.length > 0 && (
+                <button
+                  onClick={() => downloadHistory(history)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-500 text-white text-sm hover:bg-gray-600 transition"
+                >
+                  <Download size={16} />
+                </button>
+              )}
+            </div>
+
             {history.length === 0 ? (
               <p className="text-sm text-zinc-500">
                 Todavía no se ha inferido ninguna personalidad.

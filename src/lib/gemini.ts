@@ -28,7 +28,7 @@ Por favor, para cada una de las cinco dimensiones del Big Five:
 - Amabilidad
 - Neuroticismo
 
-devuelve un nivel cualitativo que puede ser uno de estos valores: "Muy bajo", "Bajo", "Medio", "Alto", "Muy alto" o "Desconocido" si no hay información suficiente.
+devuelve un nivel cualitativo que puede ser solo uno de estos valores: "Muy bajo", "Bajo", "Medio", "Alto", "Muy alto" o "Desconocido" si no hay información suficiente. No uses ningún otro valor. 
 
 Devuelve únicamente un JSON con la siguiente estructura sin texto adicional:
 
@@ -40,6 +40,9 @@ Devuelve únicamente un JSON con la siguiente estructura sin texto adicional:
   "Neuroticismo": "Nivel"
 }
 `;
+
+  console.log("[⚙️ System Message Big Five]:\n", systemMessage);
+  console.log("[📤 Prompt Big Five enviado a Gemini]:\n", userPrompt);
 
   const context = [
     {
