@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getBigFiveFromHistory } from "../lib/gemini";
 import { Download } from "lucide-react";
-
+import type { Settings } from "../lib/settings";
 type Entry = {
   date: string;
   personality: string;
@@ -10,6 +10,7 @@ type Entry = {
 
 type Props = {
   onClose: () => void;
+  settings: Settings;
 };
 
 type Level =
@@ -29,7 +30,7 @@ const levelColor: Record<Level, string> = {
   Desconocido: "bg-zinc-200 text-zinc-800",
 };
 
-export default function PersonalityHistoryModal({ onClose }: Props) {
+export default function PersonalityHistoryModal({ onClose, settings }: Props) {
   const [tab, setTab] = useState<"history" | "results">("history");
   const history: Entry[] = JSON.parse(
     localStorage.getItem("userPersonality") || "[]"
@@ -80,21 +81,22 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
       });
     }
   }, [tab, history, bigFiveResults]);
-
-  function downloadHistory(history: Entry[]) {
+  function downloadHistory(history: Entry[], userName: string) {
     const dataStr = JSON.stringify(history, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
+    const safeName = userName.toLowerCase().replace(/\s+/g, "_");
+    const fileName = `historial_personalidad_${safeName}.json`;
+
     link.href = url;
-    link.download = "historial_personalidad.json";
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }
-
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="relative bg-white p-6 rounded-xl shadow-xl w-full max-w-md space-y-4 max-h-[80vh] overflow-y-auto">
@@ -136,7 +138,9 @@ export default function PersonalityHistoryModal({ onClose }: Props) {
 
               {history.length > 0 && (
                 <button
-                  onClick={() => downloadHistory(history)}
+                  onClick={() =>
+                    downloadHistory(history, settings.userName ?? "usuario")
+                  }
                   className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-500 text-white text-sm hover:bg-gray-600 transition"
                 >
                   <Download size={16} />

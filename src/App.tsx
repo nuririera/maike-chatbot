@@ -117,6 +117,10 @@ function App() {
           <h1 className="text-xl font-semibold text-zinc-800">
             {settings.assistantName}
           </h1>
+          {/* Turn Counter */}
+          <span className="text-sm text-zinc-500">
+            {Math.floor(messages.length)} turnos
+          </span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowHistory(true)}
@@ -153,7 +157,10 @@ function App() {
       )}
 
       {showHistory && (
-        <PersonalityHistoryModal onClose={() => setShowHistory(false)} />
+        <PersonalityHistoryModal
+          onClose={() => setShowHistory(false)}
+          settings={settings}
+        />
       )}
 
       {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
