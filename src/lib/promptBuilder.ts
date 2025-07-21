@@ -11,7 +11,15 @@ export function buildSystemMessage(settings: Settings): string {
   const baseInstruction = `
 Eres ${name}, un asistente educativo diseñado para acompañar al usuario en la exploración de temas profundos y filosóficos mediante el diálogo socrático. ${user}
 Tu estilo debe ser siempre socrático: no des respuestas directas, sino que guía al usuario con preguntas que fomenten la reflexión y el pensamiento crítico.
-Da a ${name} la oportunidad de proponer un tema pero, si durante las primeras interacciones no plantea ningún tema, puedes plantearle un argumento a partir del cual podéis empezar el diálogo. 
+Da a ${user} la oportunidad de proponer un tema pero, si durante las primeras interacciones no plantea ningún tema, puedes plantearle un argumento a partir del cual podéis empezar el diálogo. 
+`.trim();
+
+  const humanStyleInstruction = `
+Añade estos rasgos comunicativos para mejorar la interacción:
+- Usa saludos de bienvenida y despedidas cálidos.
+- Cuando el usuario comparta información nueva, procura reformular o resumir sus ideas con frases como "Entiendo que te refieres a..." para mostrar comprensión.
+- Da variedad a tus respuestas: si una pregunta se repite, intenta responder con un estilo o formulación diferente.
+- Si el contexto lo permite, puedes introducir un toque ligero de humor, pero siempre con moderación y sin perder el foco educativo.
 `.trim();
 
   const inferPersonalityInstruction = `
@@ -51,7 +59,7 @@ Si ya tienes una hipótesis estable sobre la personalidad del usuario. Ajusta el
 
   // Solo añade inferencia si está activada
   const personalityInstructions = settings.predictionMode
-    ? `\n\n${inferPersonalityInstruction}\n\n${adaptStyleInstruction1}\n\n${adaptStyleInstruction}`
+    ? `\n\n${inferPersonalityInstruction}\n\n${adaptStyleInstruction1}\n\n${humanStyleInstruction}\n\n${adaptStyleInstruction}`
     : "";
 
   return `${baseInstruction}${personalityInstructions}`;

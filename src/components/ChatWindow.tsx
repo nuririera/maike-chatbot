@@ -49,18 +49,30 @@ export default function ChatWindow({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="flex gap-2">
-        <input
-          type="text"
+      <form onSubmit={onSubmit} className="flex items-end gap-2 mt-2">
+        <textarea
           value={input}
-          onChange={(e) => onInputChange(e.target.value)}
-          className="flex-1 border border-zinc-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => {
+            onInputChange(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSubmit(e);
+            }
+          }}
+          rows={1}
+          className="flex-1 resize-none overflow-hidden border border-zinc-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
           placeholder="Escribe tu mensaje..."
+          style={{ maxHeight: "150px" }}
         />
+
         <button
           type="submit"
           disabled={loading}
-          className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+          className="h-[42px] bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
         >
           Enviar
         </button>
